@@ -1,0 +1,6 @@
+node_modules
+.env
+src/uploads
+dist
+src/__tests__
+src/test-assets/

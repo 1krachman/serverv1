@@ -1,0 +1,6 @@
+backend kurang saat uplod harusnya vidionya dihapus setlah erupod dissever.
+backend butuh trackeing saat uplod video.(done-maybe)
+
+front kutarng banyak tampilan index.(belum_bagus),
+front banyak 
+front blm bisa memutar video.

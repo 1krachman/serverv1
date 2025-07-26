@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  discordId   String   @unique @map("discord_id")
+  username    String
+  email       String?
+  avatar      String?
+  accessToken String?  @map("access_token")
+  refreshToken String? @map("refresh_token")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Video {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  cloudinaryId  String   @unique
+  publicId      String   @unique
+  url           String
+  secureUrl     String
+  format        String
+  duration      Float?
+  width         Int?
+  height        Int?
+  fileSize      Int?
+  uploadedAt    DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("videos")
+}

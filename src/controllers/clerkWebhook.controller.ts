@@ -1,26 +1,31 @@
+import { Webhook } from 'svix';
 import { Request, Response } from 'express';
-import { verifyClerkSignature } from '../utils/verifyClerkSignature';
 import { handleUserCreated } from '../services/clerkWebhook.service';
 
+const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET!;
+
 export const clerkWebhookHandler = async (req: Request, res: Response) => {
-  const signature = req.headers['svix-signature'] as string;
-  const rawBody = req.body.toString();
-
-  if (!verifyClerkSignature(rawBody, signature)) {
-    return res.status(400).send('Invalid signature');
-  }
-
-  const event = JSON.parse(rawBody);
-  const { type, data } = event;
+  const payload = req.body; // raw buffer
+  // Convert headers to the required format (string keys and values)
+  const headers = {
+    'svix-id': req.headers['svix-id'] as string,
+    'svix-timestamp': req.headers['svix-timestamp'] as string,
+    'svix-signature': req.headers['svix-signature'] as string,
+  };
 
   try {
+    const wh = new Webhook(WEBHOOK_SECRET);
+    const evt = wh.verify(payload, headers) as { type: string; data: any }; 
+
+    const { type, data } = evt;
+
     if (type === 'user.created') {
       await handleUserCreated(data);
     }
 
-    return res.status(200).json({ received: true });
-  } catch (error) {
-    console.error('Webhook error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('Webhook error:', err);
+    res.status(400).json({ error: 'Invalid signature' });
   }
 };

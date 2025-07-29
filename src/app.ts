@@ -16,11 +16,15 @@ app.use(cors({
   origin: true, // For React Native or any origin
   credentials: true,
 }));
+
+
+app.use(clerkWebhookRoute);
+
+
 app.use(express.json());
 
 // Routes
 app.use('/api/videos', videoRoutes);
-app.use(clerkWebhookRoute);
 
 // Check incoming request
 app.use((req, res, next) => {

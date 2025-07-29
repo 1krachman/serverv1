@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import videoRoutes from './routes/videoRoutes';
+import clerkWebhookRoute from './routes/clerkWebhook.routes';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/videos', videoRoutes);
+app.use(clerkWebhookRoute);
 
 // Check incoming request
 app.use((req, res, next) => {

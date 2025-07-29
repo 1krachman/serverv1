@@ -8,17 +8,12 @@ const globalForPrisma = globalThis as unknown as {
 // Log the database URL (without password) for debugging
 const dbUrl = process.env.DATABASE_URL;
 if (dbUrl) {
-  if (dbUrl) {
-  // Pakai regex/manual parse kalau memang butuh debug
-  const host = dbUrl.split('@')[1]?.split('/')[0];
-  const database = dbUrl.split('/').pop();
+  const urlObj = new URL(dbUrl);
   console.log('🔗 Database connection:', {
-    host,
-    database,
-    isInternal: host?.includes('railway.internal')
+    host: urlObj.host,
+    database: urlObj.pathname.slice(1),
+    isInternal: urlObj.host.includes('railway.internal')
   });
-}
-
 } else {
   console.error('❌ DATABASE_URL not found in environment variables');
 }

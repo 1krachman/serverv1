@@ -6,7 +6,7 @@ export const handleUserCreated = async (data: any) => {
   const username = data.username || 'unknown';
   const avatar = data.image_url || null;
   const discordId = data.public_metadata?.discordId || `discord-${userId}`; // fallback dummy
-  const role = email?.endsWith('@yourcompany.com') ? 'admin' : 'client';
+  const role = email?.endsWith('kopisusu8ip@gmail.com') ? 'admin' : 'client';
 
   await prisma.user.create({
     data: {

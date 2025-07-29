@@ -15,7 +15,7 @@ const app = express();
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: true, // For React Native or any origin
+  origin: true, 
   credentials: true,
 }));
 

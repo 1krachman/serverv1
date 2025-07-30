@@ -32,7 +32,7 @@ app.use(cors({
 
 // Body parsing middleware BEFORE routes that need it
 // Note: Clerk webhook might need raw body, so handle it separately
-app.use('/api/clerk/webhook', clerkWebhookRoute);
+app.use(clerkWebhookRoute);
 
 // JSON parsing for all other routes
 app.use(express.json({ limit: '10mb' }));

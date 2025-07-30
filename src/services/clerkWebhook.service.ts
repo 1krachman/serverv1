@@ -8,7 +8,7 @@ export const handleUserCreated = async (data: any) => {
     const username = data.username || data.first_name || 'unknown';
     const avatar = data.image_url || null;
     const discordId = data.public_metadata?.discordId || `discord-${userId}`;
-    const role = email?.endsWith('kopisusu8ip@gmail.com') ? 'admin' : 'client';
+    const role = email?.endsWith('kopisusu7ip@gmail.com') ? 'admin' : 'client';
 
     // Validate required fields
     if (!userId) {

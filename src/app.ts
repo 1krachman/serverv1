@@ -9,7 +9,6 @@ import userRoutes from './routes/user.routes';
 import healthRoutes from './routes/health.routes';
 
 
-
 dotenv.config();
 
 const app = express();

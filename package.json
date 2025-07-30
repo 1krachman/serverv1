@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev"
   },
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.23",
     "@prisma/client": "^6.11.1",
     "axios": "^1.4.0",
     "bcryptjs": "^2.4.3",

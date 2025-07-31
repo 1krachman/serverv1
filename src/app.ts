@@ -29,6 +29,17 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Debug endpoint (remove in production)
+app.get('/debug/env', (req, res) => {
+  res.json({
+    NODE_ENV: process.env.NODE_ENV || 'not set',
+    PORT: process.env.PORT || 'not set',
+    CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ? 'Set (length: ' + process.env.CLERK_SECRET_KEY.length + ')' : 'Missing',
+    DATABASE_URL: process.env.DATABASE_URL ? 'Set' : 'Missing',
+    // Add other env vars you need
+  });
+});
+
 // Basic middleware
 app.use(helmet({
   contentSecurityPolicy: false, // Disable CSP for API
@@ -39,12 +50,13 @@ app.use(cors({
   credentials: true,
 }));
 
+
+app.use('/webhook', clerkWebhookRoute);
+
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Webhook route (before other JSON parsing for raw body)
-app.use('/webhook', clerkWebhookRoute);
 
 // API Routes
 app.use('/api/videos', videoRoutes);

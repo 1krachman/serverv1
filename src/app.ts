@@ -24,14 +24,11 @@ app.use(helmet());
 
 // CORS middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.com'] // Replace with your actual frontend URL
-    : true, 
+  origin: true, 
   credentials: true,
 }));
 
 // Body parsing middleware BEFORE routes that need it
-// Note: Clerk webhook might need raw body, so handle it separately
 app.use('webhook/clerk', clerkWebhookRoute);
 
 // JSON parsing for all other routes

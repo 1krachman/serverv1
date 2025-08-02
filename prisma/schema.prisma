@@ -8,26 +8,26 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  discordId   String   @unique @map("discord_id")
-  username    String
-  email       String?
-  avatar      String?
-  accessToken String?  @map("access_token")
-  refreshToken String? @map("refresh_token")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  role        String   @default("client")
-  
+  id            String   @id @default(cuid())
+  discordId     String   @unique @map("discord_id")
+  username      String
+  email         String?
+  avatar        String?
+  accessToken   String?  @map("access_token")
+  refreshToken  String?  @map("refresh_token")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  role          String   @default("client")
+
   @@map("users")
 }
 
 model Video {
-  id            String   @id @default(cuid())
+  id            String     @id @default(cuid())
   title         String
   description   String?
-  cloudinaryId  String   @unique
-  publicId      String   @unique
+  cloudinaryId  String     @unique
+  publicId      String     @unique
   url           String
   secureUrl     String
   format        String
@@ -35,8 +35,18 @@ model Video {
   width         Int?
   height        Int?
   fileSize      Int?
-  uploadedAt    DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  uploadedAt    DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  categories    Category[] // Many-to-many relation
 
   @@map("videos")
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  videos    Video[]  // Many-to-many relation
+
+  @@map("categories")
 }

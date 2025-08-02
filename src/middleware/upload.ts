@@ -51,12 +51,13 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: any) => {
 };
 
 export const upload = multer({
-  storage,
+  storage: multer.memoryStorage(), // Langsung ke memory
   limits: {
     fileSize: 10 * 1024 * 1024 * 1024, // 10GB
   },
   fileFilter,
 });
+
 
 // Export error handler for multer errors
 export const handleMulterError = (error: any, req: any, res: any, next: any) => {

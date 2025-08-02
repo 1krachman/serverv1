@@ -7,6 +7,7 @@ import videoRoutes from './routes/videoRoutes';
 import clerkWebhookRoute from './routes/clerkWebhook.routes';
 import userRoutes from './routes/user.routes';
 import healthRoutes from './routes/health.routes';
+import categoryRoutes from './routes/category.routes';
 
 dotenv.config();
 
@@ -60,6 +61,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // API Routes
 app.use('/api/videos', videoRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/', healthRoutes);
 

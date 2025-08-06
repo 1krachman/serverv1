@@ -9,8 +9,6 @@ const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 // Option A: Use your own backend URL (update this to match your Discord app settings)
 const DISCORD_REDIRECT_URI = 'https://serverv1-production-85f5.up.railway.app/api/auth/discord/callback';
 
-// Option B: Or keep using Expo's auth service (make sure it's added in Discord settings)
-// const DISCORD_REDIRECT_URI = 'https://auth.expo.io/@kannajw/akademi-crypto';
 
 // Validasi environment variables
 if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {

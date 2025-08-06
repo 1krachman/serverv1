@@ -3,7 +3,8 @@ import axios from 'axios';
 
 const router = Router();
 
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_SECRET;
+// FIX: Ada typo di sini - CLIENT_ID menggunakan CLIENT_SECRET
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID; // ← Perbaikan ini
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const DISCORD_REDIRECT_URI = 'https://auth.expo.io/@kannajw/akademi-crypto';
 
@@ -12,6 +13,12 @@ if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
   console.error('❌ DISCORD_CLIENT_ID dan DISCORD_CLIENT_SECRET harus diset di .env file');
   process.exit(1);
 }
+
+// Debug: Log environment variables (tanpa secret)
+console.log('🔧 Environment Check:');
+console.log('CLIENT_ID:', DISCORD_CLIENT_ID ? '✅ Set' : '❌ Missing');
+console.log('CLIENT_SECRET:', DISCORD_CLIENT_SECRET ? '✅ Set' : '❌ Missing');
+console.log('REDIRECT_URI:', DISCORD_REDIRECT_URI);
 
 // Endpoint untuk Discord OAuth callback
 router.post('/discord/callback', async (req, res) => {
@@ -26,17 +33,23 @@ router.post('/discord/callback', async (req, res) => {
     }
 
     console.log('📨 Menerima authorization code:', code.substring(0, 10) + '...');
+    console.log('🔧 Using CLIENT_ID:', DISCORD_CLIENT_ID);
+    console.log('🔧 Using REDIRECT_URI:', DISCORD_REDIRECT_URI);
 
     // Step 1: Tukar authorization code dengan access token
+    const tokenData = {
+      client_id: DISCORD_CLIENT_ID,
+      client_secret: DISCORD_CLIENT_SECRET,
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: DISCORD_REDIRECT_URI,
+    };
+
+    console.log('🚀 Sending token request to Discord...');
+
     const tokenResponse = await axios.post(
       'https://discord.com/api/oauth2/token',
-      new URLSearchParams({
-        client_id: DISCORD_CLIENT_ID,
-        client_secret: DISCORD_CLIENT_SECRET,
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: DISCORD_REDIRECT_URI,
-      }),
+      new URLSearchParams(tokenData),
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -62,7 +75,6 @@ router.post('/discord/callback', async (req, res) => {
     });
 
     // Step 3: Di sini Anda bisa menyimpan user ke database
-    // Contoh struktur data yang bisa disimpan:
     const userData = {
       discordId: discordUser.id,
       username: discordUser.username,
@@ -78,14 +90,6 @@ router.post('/discord/callback', async (req, res) => {
     // TODO: Simpan userData ke database Anda
     // await saveUserToDatabase(userData);
 
-    // Step 4: Generate JWT token untuk autentikasi aplikasi (opsional)
-    // const jwt = require('jsonwebtoken');
-    // const appToken = jwt.sign(
-    //   { userId: discordUser.id, email: discordUser.email },
-    //   process.env.JWT_SECRET,
-    //   { expiresIn: '7d' }
-    // );
-
     // Response sukses ke aplikasi mobile
     res.json({
       success: true,
@@ -99,17 +103,24 @@ router.post('/discord/callback', async (req, res) => {
           `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png` : 
           null,
         verified: discordUser.verified
-      },
-      // token: appToken // Uncomment jika menggunakan JWT
+      }
     });
 
   } catch (error : any) {
     console.error('❌ Error dalam Discord OAuth:', error.response?.data || error.message);
     
+    // Log lebih detail untuk debugging
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
+    
     res.status(500).json({
       success: false,
       error: 'Gagal melakukan autentikasi Discord',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      details: process.env.NODE_ENV === 'development' ? 
+        (error.response?.data || error.message) : 
+        undefined
     });
   }
 });

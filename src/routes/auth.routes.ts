@@ -3,10 +3,14 @@ import axios from 'axios';
 
 const router = Router();
 
-// FIX: Ada typo di sini - CLIENT_ID menggunakan CLIENT_SECRET
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID; // ← Perbaikan ini
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const DISCORD_REDIRECT_URI = 'https://auth.expo.io/@kannajw/akademi-crypto';
+
+// Option A: Use your own backend URL (update this to match your Discord app settings)
+const DISCORD_REDIRECT_URI = 'https://serverv1-production-85f5.up.railway.app/api/auth/discord/callback';
+
+// Option B: Or keep using Expo's auth service (make sure it's added in Discord settings)
+// const DISCORD_REDIRECT_URI = 'https://auth.expo.io/@kannajw/akademi-crypto';
 
 // Validasi environment variables
 if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
@@ -23,7 +27,7 @@ console.log('REDIRECT_URI:', DISCORD_REDIRECT_URI);
 // Endpoint untuk Discord OAuth callback
 router.post('/discord/callback', async (req, res) => {
   try {
-    const { code } = req.body;
+    const { code, redirect_uri } = req.body;
 
     if (!code) {
       return res.status(400).json({
@@ -32,9 +36,12 @@ router.post('/discord/callback', async (req, res) => {
       });
     }
 
+    // Use the redirect_uri from the request if provided, otherwise use default
+    const actualRedirectUri = redirect_uri || DISCORD_REDIRECT_URI;
+
     console.log('📨 Menerima authorization code:', code.substring(0, 10) + '...');
     console.log('🔧 Using CLIENT_ID:', DISCORD_CLIENT_ID);
-    console.log('🔧 Using REDIRECT_URI:', DISCORD_REDIRECT_URI);
+    console.log('🔧 Using REDIRECT_URI:', actualRedirectUri);
 
     // Step 1: Tukar authorization code dengan access token
     const tokenData = {
@@ -42,7 +49,7 @@ router.post('/discord/callback', async (req, res) => {
       client_secret: DISCORD_CLIENT_SECRET,
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: DISCORD_REDIRECT_URI,
+      redirect_uri: actualRedirectUri, // Use the actual redirect URI
     };
 
     console.log('🚀 Sending token request to Discord...');
@@ -82,7 +89,7 @@ router.post('/discord/callback', async (req, res) => {
       email: discordUser.email,
       avatar: discordUser.avatar,
       verified: discordUser.verified,
-      accessToken: access_token, // Simpan untuk API calls selanjutnya
+      accessToken: access_token,
       refreshToken: refresh_token,
       loginAt: new Date().toISOString()
     };
@@ -106,13 +113,19 @@ router.post('/discord/callback', async (req, res) => {
       }
     });
 
-  } catch (error : any) {
+  } catch (error: any) {
     console.error('❌ Error dalam Discord OAuth:', error.response?.data || error.message);
     
     // Log lebih detail untuk debugging
     if (error.response) {
       console.error('Response status:', error.response.status);
       console.error('Response data:', error.response.data);
+      
+      // Specific error handling for redirect_uri issues
+      if (error.response.data?.error === 'invalid_grant' && 
+          error.response.data?.error_description?.includes('redirect_uri')) {
+        console.error('💡 HINT: Check if redirect_uri in Discord app settings matches the one being used');
+      }
     }
     
     res.status(500).json({
@@ -122,6 +135,27 @@ router.post('/discord/callback', async (req, res) => {
         (error.response?.data || error.message) : 
         undefined
     });
+  }
+});
+
+// Additional endpoint untuk redirect (jika menggunakan backend redirect)
+router.get('/discord/callback', async (req, res) => {
+  try {
+    const { code, state } = req.query;
+    
+    if (!code) {
+      return res.status(400).send('Authorization code not found');
+    }
+
+    // Redirect ke aplikasi mobile dengan code
+    // Sesuaikan dengan deep link aplikasi Anda
+    const mobileAppScheme = 'akademicrypto'; // Ganti dengan scheme app Anda
+    const redirectUrl = `${mobileAppScheme}://auth/discord?code=${code}&state=${state}`;
+    
+    res.redirect(redirectUrl);
+  } catch (error) {
+    console.error('Error in Discord callback redirect:', error);
+    res.status(500).send('Authentication failed');
   }
 });
 

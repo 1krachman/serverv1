@@ -8,6 +8,7 @@ import clerkWebhookRoute from './routes/clerkWebhook.routes';
 import userRoutes from './routes/user.routes';
 import healthRoutes from './routes/health.routes';
 import categoryRoutes from './routes/category.routes';
+import authRoutes from './routes/auth.routes';
 
 dotenv.config();
 
@@ -63,6 +64,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api/videos', videoRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/', healthRoutes);
 
 // Catch-all route for debugging

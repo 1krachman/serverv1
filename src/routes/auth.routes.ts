@@ -6,9 +6,8 @@ const router = Router();
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 
-// Option A: Use your own backend URL (update this to match your Discord app settings)
-const DISCORD_REDIRECT_URI = 'https://serverv1-production-85f5.up.railway.app/api/auth/discord/callback';
-
+// FIX: Corrected the redirect URI format
+const DISCORD_REDIRECT_URI = 'exp://192.168.1.22:8081/--/auth/discord';
 
 // Validasi environment variables
 if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
@@ -47,7 +46,7 @@ router.post('/discord/callback', async (req, res) => {
       client_secret: DISCORD_CLIENT_SECRET,
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: actualRedirectUri, // Use the actual redirect URI
+      redirect_uri: actualRedirectUri,
     };
 
     console.log('🚀 Sending token request to Discord...');
@@ -59,6 +58,7 @@ router.post('/discord/callback', async (req, res) => {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
+        timeout: 15000, // 15 second timeout
       }
     );
 
@@ -70,6 +70,7 @@ router.post('/discord/callback', async (req, res) => {
       headers: {
         Authorization: `${token_type} ${access_token}`,
       },
+      timeout: 10000, // 10 second timeout
     });
 
     const discordUser = userResponse.data;
@@ -136,6 +137,16 @@ router.post('/discord/callback', async (req, res) => {
   }
 });
 
+// Health check endpoint
+router.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    discord_client_id: DISCORD_CLIENT_ID ? 'Set' : 'Missing',
+    redirect_uri: DISCORD_REDIRECT_URI
+  });
+});
+
 // Additional endpoint untuk redirect (jika menggunakan backend redirect)
 router.get('/discord/callback', async (req, res) => {
   try {
@@ -146,10 +157,10 @@ router.get('/discord/callback', async (req, res) => {
     }
 
     // Redirect ke aplikasi mobile dengan code
-    // Sesuaikan dengan deep link aplikasi Anda
-    const mobileAppScheme = 'akademicrypto'; // Ganti dengan scheme app Anda
+    const mobileAppScheme = 'percobaan'; // Sesuai dengan scheme di frontend
     const redirectUrl = `${mobileAppScheme}://auth/discord?code=${code}&state=${state}`;
     
+    console.log('🔄 Redirecting to mobile app:', redirectUrl);
     res.redirect(redirectUrl);
   } catch (error) {
     console.error('Error in Discord callback redirect:', error);
